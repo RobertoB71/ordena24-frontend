@@ -1,10 +1,12 @@
 import { matchPath } from "react-router-dom";
 
-export enum RoleId {
-  Cliente = 1,
-  Trabajador = 2,
-  Admin = 3,
-}
+export const RoleId = {
+  Cliente: 1,
+  Trabajador: 2,
+  Admin: 3,
+} as const;
+
+export type RoleId = (typeof RoleId)[keyof typeof RoleId];
 
 export const routePermissions: Array<{
   path: string;
@@ -41,5 +43,5 @@ export function canAccessRoute(pathname: string, rolId: number) {
 
   if (!roles) return true;
 
-  return roles.includes(rolId);
+  return roles.some((role) => role === rolId);
 }
