@@ -7,6 +7,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 
 import {
   GeneralAlertContext,
@@ -146,74 +147,116 @@ export default function GeneralAlertProvider({
     <GeneralAlertContext.Provider value={value}>
       {children}
 
-      {alert && alertStyle && (
-        <div className="fixed right-4 top-4 z-[70] w-[calc(100%-2rem)] max-w-sm">
-          <div
-            className={`flex gap-3 rounded-lg border ${alertStyle.border} ${alertStyle.bg} p-4 text-left shadow-xl shadow-stone-900/10`}
-            role="status"
+      <AnimatePresence mode="wait">
+        {alert && alertStyle && (
+          <motion.div
+            key={alert.id}
+            className="fixed right-4 top-4 z-[70] w-[calc(100%-2rem)] max-w-sm"
+            initial={{ opacity: 0, x: 34, y: -12, scale: 0.96 }}
+            animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 28, y: -8, scale: 0.97 }}
+            transition={{ type: "spring", stiffness: 430, damping: 32, mass: 0.8 }}
           >
-            <AlertIcon
-              size={22}
-              className={`mt-0.5 shrink-0 ${alertStyle.iconText}`}
-            />
-            <div className="min-w-0 flex-1">
-              {alert.title && (
-                <p className={`font-black ${alertStyle.text}`}>{alert.title}</p>
-              )}
-              <p className={`text-sm font-medium leading-6 ${alertStyle.text}`}>
-                {alert.message}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={closeAlert}
-              className={`rounded-lg p-1 transition hover:bg-white/60 ${alertStyle.text}`}
-              aria-label="Cerrar alerta"
+            <motion.div
+              className={`flex gap-3 rounded-lg border ${alertStyle.border} ${alertStyle.bg} p-4 text-left shadow-xl shadow-stone-900/10`}
+              role="status"
+              initial={{ filter: "blur(3px)" }}
+              animate={{ filter: "blur(0px)" }}
+              exit={{ filter: "blur(2px)" }}
+              transition={{ duration: 0.18 }}
             >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
-      )}
-
-      {confirmState && confirmStyle && (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center bg-stone-950/45 px-4 py-6">
-          <div className="w-full max-w-md rounded-lg border border-orange-100 bg-white p-6 text-left shadow-2xl">
-            <div className="flex gap-4">
-              <span
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${confirmStyle.bg} ${confirmStyle.iconText}`}
+              <motion.span
+                initial={{ rotate: -12, scale: 0.75 }}
+                animate={{ rotate: 0, scale: 1 }}
+                transition={{ type: "spring", stiffness: 520, damping: 22 }}
               >
-                <ConfirmIcon size={24} />
-              </span>
-              <div>
-                <h3 className="text-xl font-black text-[#240800]">
-                  {confirmState.title}
-                </h3>
-                <p className="mt-2 text-sm font-medium leading-6 text-stone-500">
-                  {confirmState.message}
+                <AlertIcon
+                  size={22}
+                  className={`mt-0.5 shrink-0 ${alertStyle.iconText}`}
+                />
+              </motion.span>
+              <div className="min-w-0 flex-1">
+                {alert.title && (
+                  <p className={`font-black ${alertStyle.text}`}>{alert.title}</p>
+                )}
+                <p className={`text-sm font-medium leading-6 ${alertStyle.text}`}>
+                  {alert.message}
                 </p>
               </div>
-            </div>
+              <motion.button
+                type="button"
+                onClick={closeAlert}
+                className={`rounded-lg p-1 transition hover:bg-white/60 ${alertStyle.text}`}
+                aria-label="Cerrar alerta"
+                whileHover={{ scale: 1.08, rotate: 4 }}
+                whileTap={{ scale: 0.94 }}
+              >
+                <X size={18} />
+              </motion.button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => closeConfirm(false)}
-                className="rounded-lg border border-stone-200 px-5 py-3 text-sm font-bold text-stone-600 transition hover:bg-stone-50"
-              >
-                {confirmState.cancelText}
-              </button>
-              <button
-                type="button"
-                onClick={() => closeConfirm(true)}
-                className="rounded-lg bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
-              >
-                {confirmState.confirmText}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {confirmState && confirmStyle && (
+          <motion.div
+            className="fixed inset-0 z-[80] flex items-center justify-center bg-stone-950/45 px-4 py-6"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <motion.div
+              className="w-full max-w-md rounded-lg border border-orange-100 bg-white p-6 text-left shadow-2xl"
+              initial={{ opacity: 0, y: 22, scale: 0.94 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 14, scale: 0.96 }}
+              transition={{ type: "spring", stiffness: 360, damping: 28 }}
+            >
+              <div className="flex gap-4">
+                <motion.span
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${confirmStyle.bg} ${confirmStyle.iconText}`}
+                  initial={{ scale: 0.72, rotate: -8 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.05, type: "spring", stiffness: 420, damping: 22 }}
+                >
+                  <ConfirmIcon size={24} />
+                </motion.span>
+                <div>
+                  <h3 className="text-xl font-black text-[#240800]">
+                    {confirmState.title}
+                  </h3>
+                  <p className="mt-2 text-sm font-medium leading-6 text-stone-500">
+                    {confirmState.message}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <motion.button
+                  type="button"
+                  onClick={() => closeConfirm(false)}
+                  className="rounded-lg border border-stone-200 px-5 py-3 text-sm font-bold text-stone-600 transition hover:bg-stone-50"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {confirmState.cancelText}
+                </motion.button>
+                <motion.button
+                  type="button"
+                  onClick={() => closeConfirm(true)}
+                  className="rounded-lg bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
+                  whileHover={{ y: -1 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  {confirmState.confirmText}
+                </motion.button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </GeneralAlertContext.Provider>
   );
 }

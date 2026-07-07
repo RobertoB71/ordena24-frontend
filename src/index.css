@@ -47,6 +47,8 @@
 html {
   min-width: 320px;
   background: var(--bg);
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {

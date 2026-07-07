@@ -30,7 +30,7 @@ export default function AdminTable<T>({
                 <th
                   key={column.key}
                   scope="col"
-                  className={`px-5 py-4 text-xs font-black uppercase tracking-wide text-stone-500 ${
+                className={`px-4 py-3 text-[11px] font-black uppercase tracking-wide text-stone-500 ${
                     column.className ?? ""
                   }`}
                 >
@@ -46,7 +46,7 @@ export default function AdminTable<T>({
                   {columns.map((column) => (
                     <td
                       key={column.key}
-                      className={`px-5 py-4 text-sm text-stone-700 ${
+                      className={`px-4 py-3 text-sm text-stone-700 ${
                         column.className ?? ""
                       }`}
                     >

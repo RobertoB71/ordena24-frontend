@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   Ban,
   BarChart3,
@@ -24,7 +25,12 @@ import { useGeneralAlert } from "../../components/Alerts/GeneralAlerts/useGenera
 import Navbar from "../../components/navbar/Navbar";
 import { useAuth } from "../../hooks/Auth/useAuth";
 import type { Categoria, CategoriaPayload } from "../../models/categoria";
-import type { Usuario, UsuarioPayload } from "../../models/usuario";
+import type {
+  Rol,
+  Usuario,
+  UsuarioCreatePayload,
+  UsuarioPayload,
+} from "../../models/usuario";
 import { CategoriaInstance } from "../../services/Categorias/categoriaService";
 import { UsuarioInstance } from "../../services/Usuarios/usuarioService";
 
@@ -48,17 +54,20 @@ const emptyUsuarioForm: UsuarioPayload = {
   nombre: "",
   email: "",
   rol_id: 1,
+  password: "",
 };
 
 const fetchAdminData = async () => {
-  const [usuariosResponse, categoriasResponse] = await Promise.all([
+  const [usuariosResponse, categoriasResponse, rolesResponse] = await Promise.all([
     UsuarioInstance.getUsuarios(),
     CategoriaInstance.getCategorias(),
+    UsuarioInstance.getRoles(),
   ]);
 
   return {
     usuarios: usuariosResponse.data,
     categorias: categoriasResponse.data,
+    roles: rolesResponse.data,
   };
 };
 
@@ -123,10 +132,12 @@ function AdminModal({
 export default function Admin() {
   const { user, logout } = useAuth();
   const { confirm, showError, showSuccess } = useGeneralAlert();
+  const shouldReduceMotion = useReducedMotion();
 
   const [activeTab, setActiveTab] = useState<AdminTab>("usuarios");
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [roles, setRoles] = useState<Rol[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [saving, setSaving] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
@@ -145,6 +156,7 @@ export default function Admin() {
 
       setUsuarios(data.usuarios);
       setCategorias(data.categorias);
+      setRoles(data.roles);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "No se pudo cargar la administracion";
@@ -166,6 +178,7 @@ export default function Admin() {
 
         setUsuarios(data.usuarios);
         setCategorias(data.categorias);
+        setRoles(data.roles);
       })
       .catch((err: unknown) => {
         if (!isMounted) {
@@ -213,6 +226,15 @@ export default function Admin() {
     setUsuarioModalOpen(true);
   };
 
+  const openCreateUsuarioModal = () => {
+    setSelectedUsuario(null);
+    setUsuarioForm({
+      ...emptyUsuarioForm,
+      rol_id: roles[0]?.id ?? emptyUsuarioForm.rol_id,
+    });
+    setUsuarioModalOpen(true);
+  };
+
   const closeCategoriaModal = () => {
     setCategoriaModalOpen(false);
     setSelectedCategoria(null);
@@ -223,6 +245,10 @@ export default function Admin() {
     setUsuarioModalOpen(false);
     setSelectedUsuario(null);
     setUsuarioForm(emptyUsuarioForm);
+  };
+
+  const getRoleDescription = (roleId: number) => {
+    return roles.find((role) => role.id === roleId)?.descripcion ?? `Rol ${roleId}`;
   };
 
   const handleCategoriaSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -258,21 +284,30 @@ export default function Admin() {
   const handleUsuarioSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!selectedUsuario) {
-      return;
-    }
-
     setSaving(true);
 
-    const payload: Partial<UsuarioPayload> = {
-      nombre: usuarioForm.nombre.trim(),
-      email: usuarioForm.email.trim(),
-      rol_id: Number(usuarioForm.rol_id),
-    };
-
     try {
-      await UsuarioInstance.updateUsuario(selectedUsuario.id, payload);
-      showSuccess("Usuario actualizado correctamente.");
+      if (selectedUsuario) {
+        const payload: Partial<UsuarioPayload> = {
+          nombre: usuarioForm.nombre.trim(),
+          email: usuarioForm.email.trim(),
+          rol_id: Number(usuarioForm.rol_id),
+        };
+
+        await UsuarioInstance.updateUsuario(selectedUsuario.id, payload);
+        showSuccess("Usuario actualizado correctamente.");
+      } else {
+        const payload: UsuarioCreatePayload = {
+          nombre: usuarioForm.nombre.trim(),
+          email: usuarioForm.email.trim(),
+          password: usuarioForm.password?.trim() ?? "",
+          rol_id: Number(usuarioForm.rol_id),
+        };
+
+        await UsuarioInstance.createUsuario(payload);
+        showSuccess("Usuario creado correctamente.");
+      }
+
       closeUsuarioModal();
       await loadAdminData();
     } catch (err) {
@@ -338,7 +373,7 @@ export default function Admin() {
       header: "Rol",
       render: (usuario) => (
         <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-600">
-          Rol {usuario.rol_id}
+          {getRoleDescription(usuario.rol_id)}
         </span>
       ),
     },
@@ -452,13 +487,13 @@ export default function Admin() {
     <div className="min-h-screen bg-[#fffaf4]">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="text-left">
             <p className="text-sm font-bold text-orange-600">
               Panel de administracion
             </p>
-            <h1 className="mt-2 font-serif text-5xl font-black leading-tight text-[#240800]">
+            <h1 className="mt-1 font-serif text-4xl font-black leading-tight text-[#240800] lg:text-[44px]">
               Administracion
             </h1>
           </div>
@@ -479,8 +514,8 @@ export default function Admin() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[224px_1fr]">
-          <aside className="h-fit rounded-lg border border-orange-100 bg-white p-2 shadow-sm">
+        <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+          <aside className="h-fit rounded-lg border border-orange-100 bg-white p-1.5 shadow-sm">
             <nav className="grid gap-1">
               {adminTabs.map((tab) => {
                 const Icon = tab.icon;
@@ -488,7 +523,7 @@ export default function Admin() {
                 const isEnabled = tab.key === "usuarios" || tab.key === "categorias";
 
                 return (
-                  <button
+                  <motion.button
                     key={tab.key}
                     type="button"
                     disabled={!isEnabled}
@@ -497,64 +532,104 @@ export default function Admin() {
                         setActiveTab(tab.key);
                       }
                     }}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-left text-sm font-bold transition ${
+                    className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3.5 py-2.5 text-left text-sm font-bold transition ${
                       isActive
-                        ? "bg-orange-500 text-white shadow-sm"
+                        ? "text-white"
                         : isEnabled
                           ? "text-stone-600 hover:bg-orange-50 hover:text-orange-600"
                           : "cursor-not-allowed text-stone-300"
                     }`}
+                    whileHover={isEnabled && !shouldReduceMotion ? { x: 2 } : undefined}
+                    whileTap={isEnabled && !shouldReduceMotion ? { scale: 0.98 } : undefined}
                   >
-                    <Icon size={18} />
-                    {tab.name}
-                  </button>
+                    {isActive && (
+                      <motion.span
+                        layoutId="admin-active-tab"
+                        className="absolute inset-0 rounded-lg bg-orange-500 shadow-sm"
+                        transition={{
+                          type: "spring",
+                          stiffness: 420,
+                          damping: 34,
+                        }}
+                      />
+                    )}
+                    <Icon size={18} className="relative z-10" />
+                    <span className="relative z-10">{tab.name}</span>
+                  </motion.button>
                 );
               })}
             </nav>
           </aside>
 
           <section>
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-3xl font-black text-[#240800]">{activeTitle}</h2>
-                <p className="mt-2 text-sm font-medium text-stone-500">
-                  {activeTab === "usuarios"
-                    ? "Administra accesos, roles y estados de usuarios."
-                    : "Crea y actualiza las categorias visibles del menu."}
-                </p>
-              </div>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
+                transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-2xl font-black text-[#240800]">
+                      {activeTitle}
+                    </h2>
+                    <p className="mt-2 text-sm font-medium text-stone-500">
+                      {activeTab === "usuarios"
+                        ? "Administra accesos, roles y estados de usuarios."
+                        : "Crea y actualiza las categorias visibles del menu."}
+                    </p>
+                  </div>
 
-              {activeTab === "categorias" && (
-                <button
-                  type="button"
-                  onClick={openCreateCategoriaModal}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
-                >
-                  <Plus size={18} />
-                  Nueva categoria
-                </button>
-              )}
-            </div>
+                  {activeTab === "usuarios" && (
+                    <motion.button
+                      type="button"
+                      onClick={openCreateUsuarioModal}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
+                      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                    >
+                      <Plus size={18} />
+                      Nuevo usuario
+                    </motion.button>
+                  )}
 
-            {loadingData ? (
-              <div className="flex min-h-64 items-center justify-center rounded-lg border border-orange-100 bg-white">
-                <Loader2 size={28} className="animate-spin text-orange-500" />
-              </div>
-            ) : activeTab === "usuarios" ? (
-              <AdminTable
-                columns={usuarioColumns}
-                data={usuarios}
-                emptyMessage="No hay usuarios registrados."
-                getRowKey={(usuario) => usuario.id}
-              />
-            ) : (
-              <AdminTable
-                columns={categoriaColumns}
-                data={categorias}
-                emptyMessage="No hay categorias registradas."
-                getRowKey={(categoria) => categoria.id}
-              />
-            )}
+                  {activeTab === "categorias" && (
+                    <motion.button
+                      type="button"
+                      onClick={openCreateCategoriaModal}
+                      className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
+                      whileHover={shouldReduceMotion ? undefined : { y: -1 }}
+                      whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
+                    >
+                      <Plus size={18} />
+                      Nueva categoria
+                    </motion.button>
+                  )}
+                </div>
+
+                {loadingData ? (
+                  <div className="flex min-h-64 items-center justify-center rounded-lg border border-orange-100 bg-white">
+                    <Loader2 size={28} className="animate-spin text-orange-500" />
+                  </div>
+                ) : activeTab === "usuarios" ? (
+                  <AdminTable
+                    columns={usuarioColumns}
+                    data={usuarios}
+                    emptyMessage="No hay usuarios registrados."
+                    getRowKey={(usuario) => usuario.id}
+                  />
+                ) : (
+                  <AdminTable
+                    columns={categoriaColumns}
+                    data={categorias}
+                    emptyMessage="No hay categorias registradas."
+                    getRowKey={(categoria) => categoria.id}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </section>
         </div>
       </main>
@@ -603,10 +678,10 @@ export default function Admin() {
         </AdminModal>
       )}
 
-      {usuarioModalOpen && selectedUsuario && (
+      {usuarioModalOpen && (
         <AdminModal
-          title="Editar usuario"
-          submitLabel="Actualizar usuario"
+          title={selectedUsuario ? "Editar usuario" : "Nuevo usuario"}
+          submitLabel={selectedUsuario ? "Actualizar usuario" : "Crear usuario"}
           loading={saving}
           onClose={closeUsuarioModal}
           onSubmit={handleUsuarioSubmit}
@@ -647,9 +722,7 @@ export default function Admin() {
 
           <div>
             <label className="block text-sm font-bold text-stone-700">Rol</label>
-            <input
-              type="number"
-              min={1}
+            <select
               value={usuarioForm.rol_id}
               onChange={(event) =>
                 setUsuarioForm((current) => ({
@@ -659,8 +732,36 @@ export default function Admin() {
               }
               className="mt-2 w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-800 outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
               required
-            />
+            >
+              {roles.map((role) => (
+                <option key={role.id} value={role.id}>
+                  {role.descripcion}
+                </option>
+              ))}
+            </select>
           </div>
+
+          {!selectedUsuario && (
+            <div>
+              <label className="block text-sm font-bold text-stone-700">
+                Contrasena
+              </label>
+              <input
+                type="password"
+                value={usuarioForm.password ?? ""}
+                onChange={(event) =>
+                  setUsuarioForm((current) => ({
+                    ...current,
+                    password: event.target.value,
+                  }))
+                }
+                className="mt-2 w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-medium text-stone-800 outline-none transition focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                placeholder="Minimo 6 caracteres"
+                minLength={6}
+                required
+              />
+            </div>
+          )}
         </AdminModal>
       )}
     </div>

@@ -7,6 +7,7 @@ import {
 
 import { useAuth } from "../hooks/Auth/useAuth";
 
+import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Public/Home";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
@@ -20,7 +21,7 @@ const AppRouter = () => {
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <span className="text-lg text-gray-600">Cargando sesión...</span>
+        <span className="text-lg text-gray-600">Cargando sesion...</span>
       </div>
     );
   }
@@ -30,33 +31,26 @@ const AppRouter = () => {
   return (
     <Router>
       <Routes>
-        {/* Página pública */}
-        <Route path="/" element={<Home />} />
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/login"
+            element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}
+          />
+          <Route
+            path="/register"
+            element={
+              isAuthenticated ? <Navigate to="/" replace /> : <Register />
+            }
+          />
 
-        {/* Login */}
-        <Route
-          path="/login"
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Login />
-          }
-        />
+          <Route element={<RoleRoute />}>
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/categories" element={<Admin />} />
+          </Route>
 
-        {/* Register */}
-        <Route
-          path="/register"
-          element={
-            isAuthenticated ? <Navigate to="/" replace /> : <Register />
-          }
-        />
-
-        {/* Admin */}
-        <Route element={<RoleRoute />}>
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/categories" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
         </Route>
-
-        {/* Not found */}
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

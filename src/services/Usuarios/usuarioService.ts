@@ -1,5 +1,10 @@
 import { ApiServices } from "../API/apiServices";
-import type { Usuario, UsuarioPayload } from "../../models/usuario";
+import type {
+  Rol,
+  Usuario,
+  UsuarioCreatePayload,
+  UsuarioPayload,
+} from "../../models/usuario";
 
 export class UsuarioServices extends ApiServices {
   private path = "/api/usuarios";
@@ -10,6 +15,14 @@ export class UsuarioServices extends ApiServices {
 
   public getUsuarioById = (id: number) => {
     return this.instance.get<Usuario>(`${this.path}/${id}`);
+  };
+
+  public getRoles = () => {
+    return this.instance.get<Rol[]>(`${this.path}/roles`);
+  };
+
+  public createUsuario = (usuario: UsuarioCreatePayload) => {
+    return this.instance.post<Usuario>(`${this.path}/`, usuario);
   };
 
   public updateUsuario = (id: number, usuario: Partial<UsuarioPayload>) => {
