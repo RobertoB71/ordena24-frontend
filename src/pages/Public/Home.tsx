@@ -5,7 +5,7 @@ import HomeFooter from "../../components/home/HomeFooter";
 import HomeHero from "../../components/home/HomeHero";
 import PopularSection from "../../components/home/PopularSection";
 import StatsStrip from "../../components/home/StatsStrip";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/Auth/useAuth";
 
 export default function Home() {
   const { user } = useAuth();

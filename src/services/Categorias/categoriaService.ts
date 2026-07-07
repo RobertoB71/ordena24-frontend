@@ -8,6 +8,10 @@ export class CategoriaServices extends ApiServices {
     return this.instance.get<Categoria[]>(`${this.path}/`);
   };
 
+  public getCategoriasActivas = () => {
+    return this.instance.get<Categoria[]>(`${this.path}/activas`);
+  };
+
   public getCategoriaById = (id: number) => {
     return this.instance.get<Categoria>(`${this.path}/${id}`);
   };

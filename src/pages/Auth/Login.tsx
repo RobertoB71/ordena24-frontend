@@ -10,7 +10,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 
 import { AuthInstance } from "../../services/Auth/authService";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../hooks/Auth/useAuth";
 
 export default function Login() {
   const navigate = useNavigate();

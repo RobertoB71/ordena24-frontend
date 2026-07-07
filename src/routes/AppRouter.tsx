@@ -5,12 +5,14 @@ import {
   Navigate,
 } from "react-router-dom";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/Auth/useAuth";
 
 import Home from "../pages/Public/Home";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import NotFound from "../pages/Error/NotFound";
+import Admin from "../pages/Admin/Admin";
+import RoleRoute from "./RoleRoute";
 
 const AppRouter = () => {
   const { user, loading } = useAuth();
@@ -46,6 +48,12 @@ const AppRouter = () => {
             isAuthenticated ? <Navigate to="/" replace /> : <Register />
           }
         />
+
+        {/* Admin */}
+        <Route element={<RoleRoute />}>
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/categories" element={<Admin />} />
+        </Route>
 
         {/* Not found */}
         <Route path="*" element={<NotFound />} />

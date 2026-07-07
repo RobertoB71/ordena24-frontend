@@ -1,16 +1,37 @@
 import { ChefHat, LogOut, Menu, ShoppingBag, UserPlus } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
-import { useAuth } from "../../context/AuthContext";
+import { useGeneralAlert } from "../Alerts/GeneralAlerts/useGeneralAlert";
+import { useAuth } from "../../hooks/Auth/useAuth";
+import { RoleId } from "../../security/permissions";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+  const { confirm } = useGeneralAlert();
   const navigate = useNavigate();
+  const isAdmin = user?.rol_id === RoleId.Admin;
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    const shouldLogout = await confirm({
+      title: "Cerrar sesion",
+      message: "Estas seguro de que quieres cerrar sesion?",
+      confirmText: "Si, cerrar",
+      cancelText: "Seguir aqui",
+      variant: "warning",
+    });
+
+    if (!shouldLogout) {
+      return;
+    }
+
     logout();
     navigate("/");
   };
+
+  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+    `text-sm font-semibold transition ${
+      isActive ? "text-orange-600" : "text-stone-600 hover:text-orange-600"
+    }`;
 
   return (
     <header className="sticky top-0 z-50 border-b border-orange-100 bg-[#fffaf4]/95 backdrop-blur">
@@ -25,16 +46,7 @@ export default function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-7 md:flex">
-          <NavLink
-            to="/"
-            className={({ isActive }) =>
-              `text-sm font-semibold transition ${
-                isActive
-                  ? "text-orange-600"
-                  : "text-stone-600 hover:text-orange-600"
-              }`
-            }
-          >
+          <NavLink to="/" className={navLinkClass}>
             Inicio
           </NavLink>
           <a
@@ -43,6 +55,11 @@ export default function Navbar() {
           >
             Menú
           </a>
+          {isAdmin && (
+            <NavLink to="/admin" className={navLinkClass}>
+              Administración
+            </NavLink>
+          )}
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -81,7 +98,7 @@ export default function Navbar() {
 
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => void handleLogout()}
                 className="inline-flex items-center gap-2 rounded-lg bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-stone-800"
               >
                 <LogOut size={17} />
