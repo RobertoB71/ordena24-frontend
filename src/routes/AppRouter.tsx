@@ -9,6 +9,8 @@ import { useAuth } from "../hooks/Auth/useAuth";
 
 import MainLayout from "../layouts/MainLayout";
 import Home from "../pages/Public/Home";
+import Menu from "../pages/Public/Menu";
+import ProductDetail from "../pages/Public/ProductDetail";
 import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import NotFound from "../pages/Error/NotFound";
@@ -33,6 +35,8 @@ const AppRouter = () => {
       <Routes>
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/menu/:id" element={<ProductDetail />} />
           <Route
             path="/login"
             element={isAuthenticated ? <Navigate to="/" replace /> : <Login />}

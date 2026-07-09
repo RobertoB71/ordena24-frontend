@@ -13,8 +13,8 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     const shouldLogout = await confirm({
-      title: "Cerrar sesion",
-      message: "Estas seguro de que quieres cerrar sesion?",
+      title: "Cerrar sesión",
+      message: "¿Estas seguro de que quieres cerrar sesión?",
       confirmText: "Si, cerrar",
       cancelText: "Seguir aqui",
       variant: "warning",
@@ -49,12 +49,9 @@ export default function Navbar() {
           <NavLink to="/" className={navLinkClass}>
             Inicio
           </NavLink>
-          <a
-            href="#menu"
-            className="text-sm font-semibold text-stone-600 transition hover:text-orange-600"
-          >
+          <NavLink to="/menu" className={navLinkClass}>
             Menú
-          </a>
+          </NavLink>
           {isAdmin && (
             <NavLink to="/admin" className={navLinkClass}>
               Administración
@@ -64,7 +61,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <Link
-            to="/"
+            to="/menu"
             className="flex h-10 w-10 items-center justify-center rounded-lg text-stone-600 transition hover:bg-orange-50 hover:text-orange-600 md:hidden"
             aria-label="Ir al menú"
             title="Menú"
