@@ -10,39 +10,63 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { useGeneralAlert } from "../../components/Alerts/GeneralAlerts/useGeneralAlert";
 import Navbar from "../../components/navbar/Navbar";
 import { useAuth } from "../../hooks/Auth/useAuth";
 import type { Categoria } from "../../models/categoria";
+import type { Producto } from "../../models/producto";
 import type { Rol, Usuario } from "../../models/usuario";
 import { CategoriaInstance } from "../../services/Categorias/categoriaService";
+import { ProductoInstance } from "../../services/Productos/productoService";
 import { UsuarioInstance } from "../../services/Usuarios/usuarioService";
 import CategoriasTab from "../../components/admin/Tabs/CategoriasTab";
+import ProductosTab from "../../components/admin/Tabs/ProductosTab";
 import UsuariosTab from "../../components/admin/Tabs/UsuariosTab";
 
-type AdminTab = "usuarios" | "categorias";
+type AdminTab = "usuarios" | "productos" | "categorias";
 
 const adminTabs = [
   { key: "dashboard", name: "Dashboard", icon: LayoutDashboard, disabled: true },
   { key: "usuarios", name: "Usuarios", icon: Users },
-  { key: "productos", name: "Productos", icon: Package, disabled: true },
+  { key: "productos", name: "Productos", icon: Package },
   { key: "categorias", name: "Categorias", icon: Tags },
   { key: "pedidos", name: "Pedidos", icon: ClipboardList, disabled: true },
   { key: "reportes", name: "Reportes", icon: BarChart3, disabled: true },
 ] as const;
 
+const tabRoutes: Record<AdminTab, string> = {
+  usuarios: "/admin",
+  productos: "/admin/products",
+  categorias: "/admin/categories",
+};
+
+const getTabFromPath = (pathname: string): AdminTab => {
+  if (pathname.includes("/admin/products")) {
+    return "productos";
+  }
+
+  if (pathname.includes("/admin/categories")) {
+    return "categorias";
+  }
+
+  return "usuarios";
+};
+
 const fetchAdminData = async () => {
-  const [usuariosResponse, categoriasResponse, rolesResponse] = await Promise.all([
+  const [usuariosResponse, categoriasResponse, rolesResponse, productosResponse] = await Promise.all([
     UsuarioInstance.getUsuarios(),
     CategoriaInstance.getCategorias(),
     UsuarioInstance.getRoles(),
+    ProductoInstance.getProductos(),
   ]);
 
   return {
     usuarios: usuariosResponse.data,
     categorias: categoriasResponse.data,
     roles: rolesResponse.data,
+    productos: productosResponse.data,
   };
 };
 
@@ -50,10 +74,13 @@ export default function Admin() {
   const { user, logout } = useAuth();
   const { confirm, showError } = useGeneralAlert();
   const shouldReduceMotion = useReducedMotion();
+  const location = useLocation();
+  const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState<AdminTab>("usuarios");
+  const activeTab = getTabFromPath(location.pathname);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [productos, setProductos] = useState<Producto[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
   const [loadingData, setLoadingData] = useState(true);
 
@@ -63,6 +90,7 @@ export default function Admin() {
 
       setUsuarios(data.usuarios);
       setCategorias(data.categorias);
+      setProductos(data.productos);
       setRoles(data.roles);
     } catch (err) {
       const message =
@@ -85,6 +113,7 @@ export default function Admin() {
 
         setUsuarios(data.usuarios);
         setCategorias(data.categorias);
+        setProductos(data.productos);
         setRoles(data.roles);
       })
       .catch((err: unknown) => {
@@ -159,7 +188,10 @@ export default function Admin() {
               {adminTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = tab.key === activeTab;
-                const isEnabled = tab.key === "usuarios" || tab.key === "categorias";
+                const isEnabled =
+                  tab.key === "usuarios" ||
+                  tab.key === "productos" ||
+                  tab.key === "categorias";
 
                 return (
                   <motion.button
@@ -168,7 +200,9 @@ export default function Admin() {
                     disabled={!isEnabled}
                     onClick={() => {
                       if (isEnabled) {
-                        setActiveTab(tab.key);
+                        const nextTab = tab.key as AdminTab;
+
+                        navigate(tabRoutes[nextTab]);
                       }
                     }}
                     className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3.5 py-2.5 text-left text-sm font-bold transition ${
@@ -213,6 +247,13 @@ export default function Admin() {
                   <UsuariosTab
                     usuarios={usuarios}
                     roles={roles}
+                    loadingData={loadingData}
+                    onDataChanged={loadAdminData}
+                  />
+                ) : activeTab === "productos" ? (
+                  <ProductosTab
+                    productos={productos}
+                    categorias={categorias}
                     loadingData={loadingData}
                     onDataChanged={loadAdminData}
                   />

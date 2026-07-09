@@ -6,6 +6,7 @@ interface AdminModalProps {
   children: ReactNode;
   submitLabel: string;
   loading: boolean;
+  size?: "md" | "lg";
   onClose: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
@@ -15,13 +16,18 @@ export default function AdminModal({
   children,
   submitLabel,
   loading,
+  size = "md",
   onClose,
   onSubmit,
 }: AdminModalProps) {
+  const maxWidth = size === "lg" ? "max-w-4xl" : "max-w-lg";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-4 py-6">
-      <div className="w-full max-w-lg rounded-lg border border-orange-100 bg-white p-6 text-left shadow-2xl">
-        <div className="mb-6 flex items-center justify-between gap-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-950/45 px-3 py-4 sm:px-4 sm:py-6">
+      <div
+        className={`flex max-h-[calc(100vh-2rem)] w-full ${maxWidth} flex-col overflow-hidden rounded-lg border border-orange-100 bg-white text-left shadow-2xl sm:max-h-[calc(100vh-3rem)]`}
+      >
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-orange-50 px-5 py-4 sm:px-6">
           <h3 className="text-2xl font-black text-[#240800]">{title}</h3>
           <button
             type="button"
@@ -33,10 +39,12 @@ export default function AdminModal({
           </button>
         </div>
 
-        <form onSubmit={onSubmit} className="space-y-5">
-          {children}
+        <form onSubmit={onSubmit} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+            {children}
+          </div>
 
-          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+          <div className="flex shrink-0 flex-col-reverse gap-3 border-t border-orange-50 bg-white px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
             <button
               type="button"
               onClick={onClose}

@@ -67,7 +67,7 @@ export const popularProducts: PopularProduct[] = [
 ];
 
 export const stats = [
-  { value: "2,400+", label: "Clientes felices" },
+  { value: "2,400+", label: "Bots felices" },
   { value: "50+", label: "Platos disponibles" },
   { value: "30 min", label: "Tiempo promedio" },
   { value: "4.9★", label: "Valoración media" },

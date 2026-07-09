@@ -74,7 +74,7 @@ export default function HomeHero({ isAuthenticated }: HomeHeroProps) {
                 ★★★★★
               </p>
               <p className="text-sm font-medium text-[#8a2f05]">
-                +2,400 clientes satisfechos
+                +2,400 Bots satisfechos
               </p>
             </div>
           </div>

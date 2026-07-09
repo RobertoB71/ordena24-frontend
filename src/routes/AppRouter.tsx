@@ -46,6 +46,7 @@ const AppRouter = () => {
 
           <Route element={<RoleRoute />}>
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/products" element={<Admin />} />
             <Route path="/admin/categories" element={<Admin />} />
           </Route>
 

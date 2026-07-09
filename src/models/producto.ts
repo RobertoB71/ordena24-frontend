@@ -5,6 +5,7 @@ export interface Producto {
   precio: number;
   categoria_id: number;
   disponible: boolean;
+  imagen_url?: string | null;
 }
 
 export interface ProductoPayload {
@@ -13,4 +14,6 @@ export interface ProductoPayload {
   precio: number;
   categoria_id: number;
   disponible: boolean;
+  imagen_url?: string | null;
+  imagen?: File | null;
 }
