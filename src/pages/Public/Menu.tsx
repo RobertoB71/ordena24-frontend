@@ -5,10 +5,11 @@ import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import MenuProductCard from "../../components/menu/cards/MenuProductCard";
 import { CategoriaInstance } from "../../services/Categorias/categoriaService";
-import { PedidoInstance } from "../../services/Pedidos/pedidoService";
 import { ProductoInstance } from "../../services/Productos/productoService";
 import { useGeneralAlert } from "../../components/Alerts/GeneralAlerts/useGeneralAlert";
 import { useAuth } from "../../hooks/Auth/useAuth";
+import { useCart } from "../../context/CartContext";
+import { RoleId } from "../../security/permissions";
 import type { Categoria } from "../../models/categoria";
 import type { Producto } from "../../models/producto";
 
@@ -26,6 +27,7 @@ const buildCategoryMap = (categories: Categoria[]) =>
 export default function Menu() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addItem } = useCart();
   const { showError, showSuccess, showAlert } = useGeneralAlert();
 
   const [products, setProducts] = useState<Producto[]>([]);
@@ -33,9 +35,9 @@ export default function Menu() {
   const [selectedCategory, setSelectedCategory] = useState<number | "all">("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [orderingId, setOrderingId] = useState<number | null>(null);
 
   const isAuthenticated = Boolean(user);
+  const canAddToCart = user?.rol_id !== RoleId.Trabajador;
   const categoryMap = useMemo(() => buildCategoryMap(categories), [categories]);
 
   useEffect(() => {
@@ -89,41 +91,14 @@ export default function Menu() {
     navigate("/login");
   };
 
-  const handleOrder = async (product: Producto) => {
+  const handleAddToCart = (product: Producto) => {
     if (!user) {
       handleAuthRequired();
       return;
     }
 
-    setOrderingId(product.id);
-
-    try {
-      await PedidoInstance.createPedido({
-        cliente_nombre: user.nombre,
-        cliente_email: user.email,
-        direccion_entrega: "Por confirmar",
-        total: product.precio,
-        estado: "pendiente",
-        detalle: [
-          {
-            producto_id: product.id,
-            nombre_producto: product.nombre,
-            cantidad: 1,
-            precio_unitario: product.precio,
-            subtotal: product.precio,
-          },
-        ],
-      });
-
-      showSuccess(`${product.nombre} agregado como pedido.`);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "No se pudo realizar el pedido";
-
-      showError(message);
-    } finally {
-      setOrderingId(null);
-    }
+    addItem(product);
+    showSuccess(`${product.nombre} agregado al carrito.`);
   };
 
   return (
@@ -202,14 +177,10 @@ export default function Menu() {
                   product={product}
                   categoryName={categoryMap[product.categoria_id] ?? "Menú"}
                   isAuthenticated={isAuthenticated}
+                  canAddToCart={canAddToCart}
                   onAuthRequired={handleAuthRequired}
-                  onOrder={handleOrder}
+                  onAddToCart={handleAddToCart}
                 />
-                {orderingId === product.id && (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-white/70 text-sm font-black text-orange-600 backdrop-blur-sm">
-                    Enviando pedido...
-                  </div>
-                )}
               </div>
             ))}
           </div>

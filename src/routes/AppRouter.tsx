@@ -15,6 +15,9 @@ import Login from "../pages/Auth/Login";
 import Register from "../pages/Auth/Register";
 import NotFound from "../pages/Error/NotFound";
 import Admin from "../pages/Admin/Admin";
+import Cart from "../pages/Orders/Cart";
+import MyOrders from "../pages/Orders/MyOrders";
+import WorkerOrders from "../pages/Worker/WorkerOrders";
 import RoleRoute from "./RoleRoute";
 
 const AppRouter = () => {
@@ -49,6 +52,10 @@ const AppRouter = () => {
           />
 
           <Route element={<RoleRoute />}>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Cart />} />
+            <Route path="/orders" element={<MyOrders />} />
+            <Route path="/worker/orders" element={<WorkerOrders />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/admin/products" element={<Admin />} />
             <Route path="/admin/categories" element={<Admin />} />

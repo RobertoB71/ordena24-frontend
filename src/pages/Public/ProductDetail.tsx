@@ -12,10 +12,11 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import Navbar from "../../components/navbar/Navbar";
 import { resolveImageUrl } from "../../components/menu/cards/productImage";
 import { CategoriaInstance } from "../../services/Categorias/categoriaService";
-import { PedidoInstance } from "../../services/Pedidos/pedidoService";
 import { ProductoInstance } from "../../services/Productos/productoService";
 import { useGeneralAlert } from "../../components/Alerts/GeneralAlerts/useGeneralAlert";
 import { useAuth } from "../../hooks/Auth/useAuth";
+import { useCart } from "../../context/CartContext";
+import { RoleId } from "../../security/permissions";
 import type { Categoria } from "../../models/categoria";
 import type { Producto } from "../../models/producto";
 
@@ -35,16 +36,17 @@ export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addItem } = useCart();
   const { showAlert, showError, showSuccess } = useGeneralAlert();
 
   const [product, setProduct] = useState<Producto | null>(null);
   const [products, setProducts] = useState<Producto[]>([]);
   const [categories, setCategories] = useState<Categoria[]>([]);
   const [loading, setLoading] = useState(true);
-  const [ordering, setOrdering] = useState(false);
 
   const categoryMap = useMemo(() => buildCategoryMap(categories), [categories]);
   const productId = Number(id);
+  const canAddToCart = user?.rol_id !== RoleId.Trabajador;
 
   useEffect(() => {
     if (!Number.isFinite(productId)) {
@@ -102,7 +104,7 @@ export default function ProductDetail() {
     navigate("/login");
   };
 
-  const handleOrder = async () => {
+  const handleAddToCart = () => {
     if (!product) {
       return;
     }
@@ -112,35 +114,8 @@ export default function ProductDetail() {
       return;
     }
 
-    setOrdering(true);
-
-    try {
-      await PedidoInstance.createPedido({
-        cliente_nombre: user.nombre,
-        cliente_email: user.email,
-        direccion_entrega: "Por confirmar",
-        total: product.precio,
-        estado: "pendiente",
-        detalle: [
-          {
-            producto_id: product.id,
-            nombre_producto: product.nombre,
-            cantidad: 1,
-            precio_unitario: product.precio,
-            subtotal: product.precio,
-          },
-        ],
-      });
-
-      showSuccess(`${product.nombre} agregado como pedido.`);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "No se pudo realizar el pedido";
-
-      showError(message);
-    } finally {
-      setOrdering(false);
-    }
+    addItem(product);
+    showSuccess(`${product.nombre} agregado al carrito.`);
   };
 
   if (loading) {
@@ -217,19 +192,17 @@ export default function ProductDetail() {
               </span>
             </div>
 
-            <button
-              type="button"
-              onClick={() => void handleOrder()}
-              disabled={!product.disponible || ordering}
-              className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {user ? <ShoppingBag size={18} /> : <LockKeyhole size={18} />}
-              {ordering
-                ? "Enviando pedido..."
-                : user
-                  ? "Realizar pedido"
-                  : "Inicia sesión para pedir"}
-            </button>
+            {canAddToCart && (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={!product.disponible}
+                className="mt-8 inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-orange-500 px-6 py-3 text-sm font-black text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {user ? <ShoppingBag size={18} /> : <LockKeyhole size={18} />}
+                {user ? "Agregar al carrito" : "Inicia sesión para pedir"}
+              </button>
+            )}
           </div>
         </section>
 

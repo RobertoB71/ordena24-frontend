@@ -8,16 +8,18 @@ type MenuProductCardProps = {
   product: Producto;
   categoryName: string;
   isAuthenticated: boolean;
+  canAddToCart: boolean;
   onAuthRequired: () => void;
-  onOrder: (product: Producto) => void;
+  onAddToCart: (product: Producto) => void;
 };
 
 export default function MenuProductCard({
   product,
   categoryName,
   isAuthenticated,
+  canAddToCart,
   onAuthRequired,
-  onOrder,
+  onAddToCart,
 }: MenuProductCardProps) {
   const price = new Intl.NumberFormat("es-ES", {
     style: "currency",
@@ -51,26 +53,32 @@ export default function MenuProductCard({
 
       <div className="flex items-center justify-between gap-3 px-4 pb-4">
         <strong className="text-lg font-black text-[#240800]">{price}</strong>
-        <button
-          type="button"
-          onClick={() => {
-            if (!isAuthenticated) {
-              onAuthRequired();
-              return;
-            }
+        {canAddToCart && (
+          <button
+            type="button"
+            onClick={() => {
+              if (!isAuthenticated) {
+                onAuthRequired();
+                return;
+              }
 
-            onOrder(product);
-          }}
-          disabled={!product.disponible}
-          className="inline-flex min-h-9 items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-xs font-black text-[#8a2f05] transition hover:border-orange-200 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isAuthenticated ? <ShoppingBag size={15} /> : <LockKeyhole size={15} />}
-          {product.disponible
-            ? isAuthenticated
-              ? "Pedir"
-              : "Inicia sesión"
-            : "No disponible"}
-        </button>
+              onAddToCart(product);
+            }}
+            disabled={!product.disponible}
+            className="inline-flex min-h-9 items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-xs font-black text-[#8a2f05] transition hover:border-orange-200 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isAuthenticated ? (
+              <ShoppingBag size={15} />
+            ) : (
+              <LockKeyhole size={15} />
+            )}
+            {product.disponible
+              ? isAuthenticated
+                ? "Agregar al carrito"
+                : "Inicia sesion"
+              : "No disponible"}
+          </button>
+        )}
       </div>
     </article>
   );

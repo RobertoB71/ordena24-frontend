@@ -16,12 +16,22 @@ export class PedidoServices extends ApiServices {
     return this.instance.get<Pedido>(`${this.path}/${id}`);
   };
 
+  public getPedidosByUsuario = (usuarioId: number) => {
+    return this.instance.get<Pedido[]>(`${this.path}/usuario/${usuarioId}`);
+  };
+
   public createPedido = (pedido: PedidoPayload) => {
     return this.instance.post<Pedido>(`${this.path}/`, pedido);
   };
 
   public updateEstadoPedido = (id: number, data: PedidoEstadoPayload) => {
     return this.instance.put<Pedido>(`${this.path}/${id}/estado`, data);
+  };
+
+  public cancelPedido = (pedidoId: number, usuarioId: number) => {
+    return this.instance.put<Pedido>(
+      `${this.path}/${pedidoId}/cancelar/${usuarioId}`,
+    );
   };
 
   public deletePedido = (id: number) => {
