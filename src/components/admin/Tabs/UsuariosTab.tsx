@@ -153,7 +153,7 @@ export default function UsuariosTab({
       key: "nombre",
       header: "Nombre",
       render: (usuario) => (
-        <div>
+        <div className="min-w-0">
           <p className="font-black text-stone-900">{usuario.nombre}</p>
           <p className="mt-1 text-xs font-medium text-stone-500">{usuario.email}</p>
         </div>
@@ -232,7 +232,7 @@ export default function UsuariosTab({
         <motion.button
           type="button"
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 sm:w-auto"
           whileHover={shouldReduceMotion ? undefined : { y: -1 }}
           whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
         >

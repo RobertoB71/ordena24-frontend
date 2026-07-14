@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
-  BarChart3,
-  ClipboardList,
-  LayoutDashboard,
   LogOut,
   Package,
   Tags,
@@ -152,13 +149,13 @@ export default function Admin() {
     <div className="min-h-screen bg-[#fffaf4]">
       <Navbar />
 
-      <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-6xl overflow-hidden px-3 py-5 sm:px-6 sm:py-6 lg:px-8">
         <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="text-left">
             <p className="text-sm font-bold text-orange-600">
               Panel de administracion
             </p>
-            <h1 className="mt-1 font-serif text-4xl font-black leading-tight text-[#240800] lg:text-[44px]">
+            <h1 className="mt-1 font-serif text-3xl font-black leading-tight text-[#240800] sm:text-4xl lg:text-[44px]">
               Administracion
             </h1>
           </div>
@@ -179,9 +176,9 @@ export default function Admin() {
           </div>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-[200px_minmax(0,1fr)]">
           <aside className="h-fit rounded-lg border border-orange-100 bg-white p-1.5 shadow-sm">
-            <nav className="grid gap-1">
+            <nav className="grid grid-cols-3 gap-1 lg:grid-cols-1">
               {adminTabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = tab.key === activeTab;
@@ -202,7 +199,7 @@ export default function Admin() {
                         navigate(tabRoutes[nextTab]);
                       }
                     }}
-                    className={`relative flex items-center gap-3 overflow-hidden rounded-lg px-3.5 py-2.5 text-left text-sm font-bold transition ${
+                    className={`relative flex min-w-0 flex-col items-center gap-1.5 overflow-hidden rounded-lg px-2 py-2.5 text-center text-xs font-bold transition sm:flex-row sm:gap-3 sm:px-3.5 sm:text-left sm:text-sm lg:flex-row ${
                       isActive
                         ? "text-white"
                         : isEnabled
@@ -231,7 +228,7 @@ export default function Admin() {
             </nav>
           </aside>
 
-          <section>
+          <section className="min-w-0">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab}

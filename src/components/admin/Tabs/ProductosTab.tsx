@@ -217,7 +217,7 @@ export default function ProductosTab({
       key: "producto",
       header: "Producto",
       render: (producto) => (
-        <div className="flex items-center gap-3">
+        <div className="flex min-w-0 items-center justify-end gap-3 text-left sm:justify-start">
           {producto.imagen_url ? (
             <img
               src={getImageSrc(producto.imagen_url) ?? ""}
@@ -229,10 +229,10 @@ export default function ProductosTab({
               Sin foto
             </div>
           )}
-          <div>
-            <p className="font-black text-stone-900">{producto.nombre}</p>
+          <div className="min-w-0">
+            <p className="truncate font-black text-stone-900">{producto.nombre}</p>
             {producto.descripcion && (
-              <p className="mt-1 max-w-md text-xs font-medium text-stone-500">
+              <p className="mt-1 line-clamp-2 max-w-md text-xs font-medium text-stone-500">
                 {producto.descripcion}
               </p>
             )}
@@ -327,7 +327,7 @@ export default function ProductosTab({
   return (
     <>
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-2xl font-black text-[#240800]">Productos</h2>
           <p className="mt-2 text-sm font-medium text-stone-500">
             Crea, actualiza y gestiona la disponibilidad del menu.
@@ -338,7 +338,7 @@ export default function ProductosTab({
           type="button"
           onClick={openCreateModal}
           disabled={modalCategorias.length === 0}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange-500 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           whileHover={shouldReduceMotion ? undefined : { y: -1 }}
           whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
         >

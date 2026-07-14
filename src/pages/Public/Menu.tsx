@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Utensils } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import Navbar from "../../components/navbar/Navbar";
 import MenuProductCard from "../../components/menu/cards/MenuProductCard";
@@ -26,6 +26,7 @@ const buildCategoryMap = (categories: Categoria[]) =>
 
 export default function Menu() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const { addItem } = useCart();
   const { showError, showSuccess, showAlert } = useGeneralAlert();
@@ -50,6 +51,10 @@ export default function Menu() {
 
         setProducts(productsResponse.data);
         setCategories(categoriesResponse.data);
+        const requestedCategory = Number(searchParams.get("categoria"));
+        if (categoriesResponse.data.some((category) => category.id === requestedCategory)) {
+          setSelectedCategory(requestedCategory);
+        }
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "No se pudo cargar el menú";
@@ -61,7 +66,7 @@ export default function Menu() {
     };
 
     void loadMenu();
-  }, [showError]);
+  }, [searchParams, showError]);
 
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();

@@ -1,39 +1,32 @@
-import { Clock3 } from "lucide-react";
-import type { PopularProduct } from "./homeData";
+import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import type { Producto } from "../../models/producto";
+import { resolveImageUrl } from "../menu/cards/productImage";
 
 type ProductCardProps = {
-  product: PopularProduct;
+  product: Producto;
+  categoryName: string;
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
-  return (
-    <article className="overflow-hidden rounded-lg border border-orange-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-100">
-      <div className="relative">
-        <img
-          src={product.imageUrl}
-          alt={product.name}
-          className="h-48 w-full object-cover"
-        />
-        <span className="absolute right-3 top-3 rounded-lg bg-white px-3 py-1 text-sm font-black text-[#240800] shadow-sm">
-          {product.price}
-        </span>
-      </div>
+const priceFormatter = new Intl.NumberFormat("es-ES", { style: "currency", currency: "EUR" });
 
-      <div className="p-4 text-left">
-        <span className="rounded-lg bg-orange-50 px-3 py-1 text-xs font-semibold text-orange-600">
-          {product.category}
-        </span>
-        <h3 className="mt-4 text-xl font-black text-[#240800]">
-          {product.name}
-        </h3>
-        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#8a2f05]">
-          {product.description}
-        </p>
-        <p className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-[#8a2f05]">
-          <Clock3 size={16} />
-          {product.time}
-        </p>
-      </div>
-    </article>
+export default function ProductCard({ product, categoryName }: ProductCardProps) {
+  return (
+    <Link to={`/menu/${product.id}`} className="group overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-200/60">
+      <article>
+        <div className="relative h-56 overflow-hidden bg-orange-50">
+          <img src={resolveImageUrl(product.imagen_url)} alt={product.nombre} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
+          <span className="absolute right-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-sm font-black text-[#240800] shadow-sm backdrop-blur">{priceFormatter.format(product.precio)}</span>
+        </div>
+        <div className="p-5 text-left">
+          <span className="inline-flex rounded-full bg-orange-50 px-3 py-1 text-xs font-bold text-orange-600">{categoryName}</span>
+          <div className="mt-4 flex items-start justify-between gap-3">
+            <h3 className="text-xl font-black text-[#240800]">{product.nombre}</h3>
+            <ArrowUpRight size={20} className="shrink-0 text-orange-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </div>
+          <p className="mt-2 line-clamp-2 min-h-12 text-sm leading-6 text-[#8a2f05]">{product.descripcion || "Producto fresco preparado al momento."}</p>
+        </div>
+      </article>
+    </Link>
   );
 }

@@ -12,7 +12,7 @@ export default function HomeFooter() {
         </div>
 
         <p className="text-sm text-orange-100/70">
-          © 2025 Ordena24. Todos los derechos reservados.
+          © 2026 Ordena24. Todos los derechos reservados Proyecto Final.
         </p>
       </div>
     </footer>

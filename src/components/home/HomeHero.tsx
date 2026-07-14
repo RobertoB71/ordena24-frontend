@@ -32,13 +32,13 @@ export default function HomeHero({ isAuthenticated }: HomeHeroProps) {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="#menu"
+            <Link
+              to="/menu"
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-orange-500 px-6 py-4 text-base font-bold text-white shadow-lg shadow-orange-200 transition hover:bg-orange-600"
             >
               Ver Menú
               <ArrowRight size={18} />
-            </a>
+            </Link>
 
             {!isAuthenticated && (
               <>
