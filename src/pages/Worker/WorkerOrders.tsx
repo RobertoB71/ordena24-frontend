@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   ChevronRight,
   ClipboardList,
+  Download,
   Eye,
   MapPin,
   RefreshCw,
@@ -11,6 +12,7 @@ import Navbar from "../../components/navbar/Navbar";
 import { useGeneralAlert } from "../../components/Alerts/GeneralAlerts/useGeneralAlert";
 import { useAuth } from "../../hooks/Auth/useAuth";
 import { PedidoInstance } from "../../services/Pedidos/pedidoService";
+import { ReporteInstance } from "../../services/Reportes/reporteService";
 import type { Pedido } from "../../models/pedido";
 
 const statuses = [
@@ -45,6 +47,7 @@ export default function WorkerOrders() {
   const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [downloadingReport, setDownloadingReport] = useState(false);
 
   const loadOrders = async () => {
     setLoading(true);
@@ -127,6 +130,35 @@ export default function WorkerOrders() {
     }
   };
 
+  const handleDownloadReport = async () => {
+    setDownloadingReport(true);
+
+    try {
+      const estado = selectedStatus === "Todos" ? undefined : selectedStatus;
+      const response = await ReporteInstance.descargarReportePedidos(estado);
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+      const statusSuffix = estado
+        ? `-${estado.toLowerCase().replaceAll(" ", "-")}`
+        : "";
+
+      link.href = url;
+      link.download = `reporte-pedidos${statusSuffix}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      showSuccess("Reporte descargado correctamente.");
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo generar el reporte";
+
+      showError(message);
+    } finally {
+      setDownloadingReport(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#fffaf4]">
       <Navbar />
@@ -144,14 +176,25 @@ export default function WorkerOrders() {
               Hola, {user?.nombre}. Aqui estan los pedidos activos.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void loadOrders()}
-            className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-2 text-sm font-black text-[#8a2f05] transition hover:bg-orange-50"
-          >
-            <RefreshCw size={16} />
-            Actualizar
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={downloadingReport}
+              onClick={() => void handleDownloadReport()}
+              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-black text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Download size={16} />
+              {downloadingReport ? "Generando..." : "Descargar reporte"}
+            </button>
+            <button
+              type="button"
+              onClick={() => void loadOrders()}
+              className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-white px-4 py-2 text-sm font-black text-[#8a2f05] transition hover:bg-orange-50"
+            >
+              <RefreshCw size={16} />
+              Actualizar
+            </button>
+          </div>
         </div>
 
         <section className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

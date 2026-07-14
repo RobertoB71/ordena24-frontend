@@ -28,7 +28,6 @@ import UsuariosTab from "../../components/admin/Tabs/UsuariosTab";
 type AdminTab = "usuarios" | "productos" | "categorias";
 
 const adminTabs = [
-  { key: "dashboard", name: "Dashboard", icon: LayoutDashboard, disabled: true },
   { key: "usuarios", name: "Usuarios", icon: Users },
   { key: "productos", name: "Productos", icon: Package },
   { key: "categorias", name: "Categorias", icon: Tags },
