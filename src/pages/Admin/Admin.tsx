@@ -32,8 +32,6 @@ const adminTabs = [
   { key: "usuarios", name: "Usuarios", icon: Users },
   { key: "productos", name: "Productos", icon: Package },
   { key: "categorias", name: "Categorias", icon: Tags },
-  { key: "pedidos", name: "Pedidos", icon: ClipboardList, disabled: true },
-  { key: "reportes", name: "Reportes", icon: BarChart3, disabled: true },
 ] as const;
 
 const tabRoutes: Record<AdminTab, string> = {
